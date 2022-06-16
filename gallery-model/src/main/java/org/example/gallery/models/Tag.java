@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -13,17 +14,22 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table
+@Table(name = "TAG")
 public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
-    @Column(unique = true)
+    @Column(name = "NAME", unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "tags")
-    private Set<Image> images;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "TAG_IMAGES",
+            joinColumns = @JoinColumn(name = "TAG_ID"),
+            inverseJoinColumns = @JoinColumn(name = "IMAGE_ID"))
+    private Set<Image> images = new HashSet<>();
 
 }

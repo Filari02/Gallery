@@ -15,36 +15,38 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table
+@Table(name = "IMAGE")
 public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
-    @Column
+    @Column(name = "NAME")
     private String name;
 
-    @Column
+    @Column(name = "UPLOAD_DATE")
     private Date uploadDate;
 
-    @Column
+    @Column(name = "DESCRIPTION")
     private String description;
 
-    @Column
+    @Column(name = "FILE_PATH")
     private String filePath;
 
-    @Column
+    @Column(name = "THUMBNAIL_FILE_PATH")
     private String thumbnailFilePath;
 
     @ManyToOne
+    @JoinColumn(name = "USER_ID")
     private User user;
 
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "image_tags",
-        joinColumns = @JoinColumn(name = "image_id"),
-        inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @JoinTable(name = "TAG_IMAGES",
+        joinColumns = @JoinColumn(name = "IMAGE_ID"),
+        inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
     private Set<Tag> tags = new HashSet<>();
 
 

@@ -1,6 +1,6 @@
 package org.example.gallery.models;
 
 public enum UserType {
-    admin,
-    simpleUser
+    ADMIN,
+    SIMPLE_USER
 }
