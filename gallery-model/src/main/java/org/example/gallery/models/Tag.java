@@ -14,7 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "TAG")
+@Table(name = "TAGS")
 public class Tag {
 
     @Id
@@ -27,7 +27,7 @@ public class Tag {
 
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "TAG_IMAGES",
+    @JoinTable(name = "TAGS_IMAGES",
             joinColumns = @JoinColumn(name = "TAG_ID"),
             inverseJoinColumns = @JoinColumn(name = "IMAGE_ID"))
     private Set<Image> images = new HashSet<>();
