@@ -11,13 +11,13 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "USERS")
+@Table(name = "USER")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private Long id;
+    private int id;
 
     @Column(name = "EMAIL", unique = true)
     private String email;
@@ -29,7 +29,7 @@ public class User {
     private String password;
 
     @Column(name = "USER_TYPE")
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private UserType userType;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

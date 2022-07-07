@@ -19,12 +19,12 @@
         <dependency>
             <groupId>org.example</groupId>
             <artifactId>gallery-bl</artifactId>
-            <version>${gallery-blVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>

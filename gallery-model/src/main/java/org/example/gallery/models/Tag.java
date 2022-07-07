@@ -14,22 +14,15 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "TAGS")
+@Table(name = "TAG")
 public class Tag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private Long id;
+    private int id;
 
     @Column(name = "NAME", unique = true)
     private String name;
-
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "TAGS_IMAGES",
-            joinColumns = @JoinColumn(name = "TAG_ID"),
-            inverseJoinColumns = @JoinColumn(name = "IMAGE_ID"))
-    private Set<Image> images = new HashSet<>();
 
 }

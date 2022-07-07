@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.sql.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,13 +15,13 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "IMAGES")
+@Table(name = "IMAGE")
 public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private Long id;
+    private int id;
 
     @Column(name = "NAME")
     private String name;
@@ -43,8 +43,8 @@ public class Image {
     private User user;
 
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "TAGS_IMAGES",
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @JoinTable(name = "IMAGE_TAGS",
         joinColumns = @JoinColumn(name = "IMAGE_ID"),
         inverseJoinColumns = @JoinColumn(name = "TAG_ID"))
     private Set<Tag> tags = new HashSet<>();
