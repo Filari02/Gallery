@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "IMAGE")
+@Table(name = "IMAGE", schema = "public")
 public class Image {
 
     @Id
@@ -25,6 +25,9 @@ public class Image {
 
     @Column(name = "NAME")
     private String name;
+
+    @Column(name = "UUID")
+    private String uuid;
 
     @Column(name = "UPLOAD_DATE")
     private Date uploadDate;
