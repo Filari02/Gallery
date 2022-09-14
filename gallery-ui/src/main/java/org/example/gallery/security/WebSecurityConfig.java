@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,13 +17,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
-        securedEnabled = true
+        securedEnabled = true,
+        prePostEnabled = true
 )
 @RequiredArgsConstructor
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
     private final UserDetailsService userDetailsService;
+    private final AuthEntryPointJwt unauthorizedHandler;
+    private final AuthTokenFilter authTokenFilter;
 
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
@@ -44,15 +45,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
+        http.cors()
+                .and().csrf().disable()
+                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .antMatchers("/images").permitAll()
-                .anyRequest().permitAll()
-                .and()
-                .httpBasic();
+                .antMatchers("/images").permitAll();
+        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
-
-
-
 }

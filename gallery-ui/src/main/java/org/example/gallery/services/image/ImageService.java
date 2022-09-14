@@ -8,7 +8,6 @@ import org.example.gallery.views.image.ImageView;
 import java.util.List;
 
 public interface ImageService {
-
     List<ImagePreviewView> getAllImages();
 
     ImageView getImage(int id);

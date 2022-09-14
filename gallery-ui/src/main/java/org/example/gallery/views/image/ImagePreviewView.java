@@ -10,13 +10,9 @@ import java.util.Set;
 @Data
 @Builder
 public class ImagePreviewView {
-
     private int id;
-
     private String name;
-
     private Set<Tag> tags;
-
     private String thumbnailPath;
 
     public static ImagePreviewView of (Image image) {

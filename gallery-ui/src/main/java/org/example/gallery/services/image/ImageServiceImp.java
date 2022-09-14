@@ -1,6 +1,8 @@
 package org.example.gallery.services.image;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.gallery.models.Image;
 import org.example.gallery.models.Tag;
 import org.example.gallery.repositories.image.ImageRepository;
@@ -9,30 +11,27 @@ import org.example.gallery.views.image.ImagePostView;
 import org.example.gallery.views.image.ImagePreviewView;
 import org.example.gallery.views.image.ImageUpdateView;
 import org.example.gallery.views.image.ImageView;
+
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImp implements ImageService {
-
     private final ImageRepository imageRepository;
-
     private final TagRepository tagRepository;
+    private final static Logger logger = LogManager.getLogger(ImageServiceImp.class);
 
     @Override
     public List<ImagePreviewView> getAllImages() {
         List<Image> images = imageRepository.findAll();
 
         List<ImagePreviewView> imagePreviewViews = new ArrayList<>();
-        images.forEach(i -> {
-            imagePreviewViews.add(ImagePreviewView.of(i));
-        });
+        images.stream().map(ImagePreviewView::of).collect(Collectors.toList());
         return imagePreviewViews;
     }
 
@@ -51,14 +50,12 @@ public class ImageServiceImp implements ImageService {
             Image image = new Image();
             image.setDescription(imagePostView.getDescription());
             image.setName(imagePostView.getName());
+            image.setTags(getTagsForImage(imagePostView.getTags()));
 
-            image.setTags(getTagsForImage(image, imagePostView.getTags()));
-
-            imageRepository.save(image, file);
+            imageRepository.save(image, file, imagePostView.getFile().getOriginalFilename());
 
         } catch (IOException e) {
-            e.printStackTrace();
-            //pridet loginima
+            logger.error(e, e);
         }
     }
 
@@ -67,7 +64,7 @@ public class ImageServiceImp implements ImageService {
         Image image = imageRepository.findById(id);
         image.setName(imageUpdateView.getName());
         image.setDescription(imageUpdateView.getDescription());
-        image.setTags(getTagsForImage(image, imageUpdateView.getTags()));
+        image.setTags(getTagsForImage(imageUpdateView.getTags()));
 
         imageRepository.update(image);
     }
@@ -77,22 +74,15 @@ public class ImageServiceImp implements ImageService {
         imageRepository.deleteById(id);
     }
 
+    private Set<Tag> getTagsForImage(List<String> tagStrings) {
+        Set<Tag> tags = tagRepository.findByNameIn(tagStrings);
 
-    private Set<Tag> getTagsForImage(Image image, List<String> tagStrings) {
+        Map<String, Tag> tagMap = tags.stream().collect(Collectors.toMap(Tag::getName, Function.identity()));
+        Set<Tag> allTags = tagStrings.stream().map(t -> Optional.ofNullable(tagMap.get(t))
+            .orElseGet(() -> new Tag(t)))
+            .collect(Collectors.toSet());
 
-        Set<Tag> tags = new HashSet<>();
-
-        for (String tagName : tagStrings) {
-            Tag tag = tagRepository.findByName(tagName);
-
-            if (tag == null) {
-                Tag newTag = new Tag();
-                newTag.setName(tagName);
-                tags.add(newTag);
-            }
-            tags.add(tag);
-        }
-        return tags;
+        return allTags;
     }
 }
 

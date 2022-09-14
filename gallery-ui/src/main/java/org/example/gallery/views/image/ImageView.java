@@ -11,19 +11,12 @@ import java.util.Set;
 @Data
 @Builder
 public class ImageView {
-
     private int id;
-
     private String name;
-
     private Date uploadDate;
-
     private String description;
-
     private String filePath;
-
     private String userName;
-
     private Set<Tag> tags;
 
     public static ImageView of(Image image) {

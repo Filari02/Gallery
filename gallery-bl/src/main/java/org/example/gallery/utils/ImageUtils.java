@@ -11,11 +11,9 @@ import java.io.InputStream;
 import java.util.UUID;
 
 public class ImageUtils {
-
     private final static int THUMBNAIL_SIZE = 200;
 
     public static byte[] createThumbnail(byte[] bytes) throws IOException {
-
         InputStream is = new ByteArrayInputStream(bytes);
         BufferedImage bufferedImage = ImageIO.read(is);
 

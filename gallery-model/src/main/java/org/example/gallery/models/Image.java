@@ -15,9 +15,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "IMAGE", schema = "public")
+@Table(name = "IMAGE")
 public class Image {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
@@ -44,7 +43,6 @@ public class Image {
     @ManyToOne
     @JoinColumn(name = "USER_ID")
     private User user;
-
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     @JoinTable(name = "IMAGE_TAGS",

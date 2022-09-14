@@ -1,9 +1,9 @@
 package org.example.gallery.repositories.image;
 
 import org.example.gallery.models.*;
-import org.example.gallery.repositories.image.ImageRepository;
 import org.example.gallery.utils.ImageUtils;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -12,18 +12,21 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.transaction.Transactional;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 
-
 @Repository
 public class ImageRepositoryImp implements ImageRepository {
-
     @PersistenceContext
     private EntityManager em;
 
-    private static final String ROOT = "D:/Gallery/";
+    @Value("${image.root-path}")
+    private String root;
 
+    private static final String FULL_IMAGE_PATH = "/full_image/";
+    private static final String THUMBNAIL_IMAGE_PATH = "/thumbnail_image/";
 
     public Image findById(int id) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -51,21 +54,28 @@ public class ImageRepositoryImp implements ImageRepository {
 
     @Override
     @Transactional
-    public void save(Image image, byte[] bytes) {
-
-        String uuid = ImageUtils.generateUUID();
-        image.setUuid(uuid);
+    public void save(Image image, byte[] bytes, String fileName) throws IOException {
         try {
+            String uuid = ImageUtils.generateUUID();
+            image.setUuid(uuid);
+
             byte[] thumbnail = ImageUtils.createThumbnail(bytes);
 
-            image.setFilePath(saveImageLocally(bytes, uuid, image.getName(), false));
-            image.setThumbnailFilePath(saveImageLocally(thumbnail, uuid, image.getName(), true));
+            image.setFilePath(saveImageLocally(bytes, uuid, fileName, false));
+            image.setThumbnailFilePath(saveImageLocally(thumbnail, uuid, fileName, true));
             image.setUploadDate(new Date());
 
             em.persist(image);
         } catch (Exception e) {
             e.printStackTrace();
-            deleteDirectory(new File(ROOT + uuid));
+
+            if(image.getFilePath() != null) {
+                deleteFile(image.getFilePath());
+
+                if (image.getThumbnailFilePath() != null) {
+                    deleteFile(image.getThumbnailFilePath());
+                }
+            }
         }
     }
 
@@ -78,6 +88,7 @@ public class ImageRepositoryImp implements ImageRepository {
     @Override
     @Transactional
     public void deleteById(int id) {
+        Image image = findById(id);
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaDelete<Image> criteriaDelete = cb.createCriteriaDelete(Image.class);
@@ -87,19 +98,15 @@ public class ImageRepositoryImp implements ImageRepository {
 
         em.createQuery(criteriaDelete).executeUpdate();
 
-        String uuid = findById(id).getUuid();
-        deleteDirectory(new File(ROOT + uuid));
+        deleteFile(image.getFilePath());
+        deleteFile(image.getThumbnailFilePath());
     }
 
+    private String saveImageLocally (byte[] image, String uuid, String fileName, boolean isThumbnail) throws IOException {
+        String folder = isThumbnail ? THUMBNAIL_IMAGE_PATH : FULL_IMAGE_PATH;
+        String path = root + uuid + folder + fileName;
 
-    private String saveImageLocally (byte[] image, String uuid, String name, boolean isThumbnail)
-            throws IOException {
-
-        String folder = isThumbnail ? "/thumbnail_image/" : "/full_image/";
-        String path = ROOT + uuid + folder + name + ".png";
-
-        new File(ROOT + uuid + folder).mkdirs();
-
+        new File(root + uuid + folder).mkdirs();
         FileOutputStream fos = new FileOutputStream(path);
         fos.write(image);
         fos.close();
@@ -107,14 +114,31 @@ public class ImageRepositoryImp implements ImageRepository {
         return path;
     }
 
+    void deleteFile(String path) {
+        try {
+            File file = new File(path);
+            file.delete();
 
-    void deleteDirectory(File directoryToBeDeleted) {
-        File[] allContents = directoryToBeDeleted.listFiles();
-        if (allContents != null) {
-            for (File file : allContents) {
-                deleteDirectory(file);
+            String directoryPath = file.getParentFile().getAbsolutePath();
+
+            if (isDirectoryEmpty(directoryPath)) {
+                deleteEmptyDirectory(directoryPath);
             }
+        } catch(SecurityException e) {
+
         }
-        directoryToBeDeleted.delete();
+    }
+
+    void deleteEmptyDirectory(String path) {
+        File directory = new File(path);
+        System.out.println(directory.delete());
+    }
+
+    private boolean isDirectoryEmpty(String directory) {
+        try (var entries = Files.list(Paths.get(directory))) {
+            return entries.count() == 0;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

@@ -1,11 +1,19 @@
 package org.example.gallery.services.user;
 
+import org.example.gallery.views.user.UserInfo;
 import org.example.gallery.views.user.UserLoginView;
 import org.example.gallery.views.user.UserRegisterView;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 
 public interface UserService {
-
     void register(UserRegisterView userRegisterView);
 
-    void login(UserLoginView userLoginView) throws Exception;
+    ResponseEntity<UserInfo> login(UserLoginView userLoginView);
+
+    boolean checkPassword(String password);
+
+    boolean isEmailValid(String email);
+
+    ResponseEntity<UserInfo> logout();
 }

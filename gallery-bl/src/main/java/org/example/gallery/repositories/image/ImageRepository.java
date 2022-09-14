@@ -1,18 +1,16 @@
 package org.example.gallery.repositories.image;
 
 import org.example.gallery.models.Image;
-import org.springframework.stereotype.Repository;
 
-import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
 
 public interface ImageRepository {
-
     Image findById(int id);
 
     List<Image> findAll();
 
-    void save(Image image, byte[] bytes);
+    void save(Image image, byte[] bytes, String fileName) throws IOException;
 
     void update(Image image);
 
