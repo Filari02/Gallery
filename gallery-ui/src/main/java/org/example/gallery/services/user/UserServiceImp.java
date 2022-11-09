@@ -1,5 +1,6 @@
 package org.example.gallery.services.user;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.example.gallery.models.User;
 import org.example.gallery.models.UserType;
@@ -34,9 +35,9 @@ public class UserServiceImp implements UserService {
     private final JwtUtils jwtUtils;
 
     public void register(UserRegisterView userRegisterView) {
-        if(!(checkPassword(userRegisterView.getPassword()) && isEmailValid(userRegisterView.getEmail()))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
+        checkPassword(userRegisterView.getPassword());
+        checkEmail((userRegisterView.getEmail()));
+
         User user = new User();
         user.setEmail(userRegisterView.getEmail());
         user.setName(userRegisterView.getName());
@@ -55,19 +56,21 @@ public class UserServiceImp implements UserService {
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
         List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body(UserInfo.of(userDetails));
+                .body(UserInfo.of(userDetails, roles));
     }
 
-    @Override
-    public boolean checkPassword(String password) {
-        return password.matches("(?=.[A-Z])(?=.[a-z])(?=.\\d)");
+
+    private void checkPassword(String password) {
+        if (!(password.matches(".*\\d*") && password.matches(".*[A-Z]*") && password.matches(".*[a-z]*"))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password does not contain required letters");
+        }
     }
 
-    @Override
-    public boolean isEmailValid(String email) {
-        return userRepository.findByEmail(email).isEmpty();
+    private void checkEmail(String email) {
+        if(userRepository.findByEmail(email).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "That email already exists");
+        }
     }
-
 
     @Override
     public ResponseEntity<UserInfo> logout() {

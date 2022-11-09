@@ -11,4 +11,5 @@ public class ImagePostView {
     private String name;
     private String description;
     private List<String> tags;
+    private int userId;
 }

@@ -6,8 +6,10 @@ import org.example.gallery.views.image.ImagePostView;
 import org.example.gallery.views.image.ImagePreviewView;
 import org.example.gallery.views.image.ImageUpdateView;
 import org.example.gallery.views.image.ImageView;
+import org.example.gallery.views.image.SearchTerm;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,6 +28,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/images")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ImageController {
     private final ImageService imageService;
 
@@ -41,10 +44,18 @@ public class ImageController {
         return imageService.getImage(id);
     }
 
+    @GetMapping("/search")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<ImagePreviewView> getImageByAttributes(@RequestParam(name = "name", required = false) String searchTerm, @RequestParam(required = false) List<String> tagNames) {
+        SearchTerm searchTerm1 = new SearchTerm();
+        searchTerm1.setName(searchTerm);
+        searchTerm1.setTagNames(tagNames);
+        return imageService.getImagesByAttributes(searchTerm1);
+    }
+
     @PostMapping(consumes = {"multipart/form-data"})
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void uploadImage(@RequestParam("image") MultipartFile imageFile, @ModelAttribute ImagePostView imagePostView) {
-        imagePostView.setFile(imageFile);
+    public void uploadImage(@ModelAttribute ImagePostView imagePostView) {
         imageService.postImage(imagePostView);
     }
 
@@ -54,7 +65,6 @@ public class ImageController {
         imageService.updateImage(id, imageUpdateView);
     }
 
-    //@PreAuthorize(("hasRole(T(org.example.gallery.models.UserType).ADMIN.toString())"))
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.OK)

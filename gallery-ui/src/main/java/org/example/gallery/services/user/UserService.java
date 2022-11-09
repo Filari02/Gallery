@@ -11,9 +11,5 @@ public interface UserService {
 
     ResponseEntity<UserInfo> login(UserLoginView userLoginView);
 
-    boolean checkPassword(String password);
-
-    boolean isEmailValid(String email);
-
     ResponseEntity<UserInfo> logout();
 }
